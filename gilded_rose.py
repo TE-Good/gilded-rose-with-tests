@@ -4,6 +4,7 @@ class GildedRose(object):
 
     def __init__(self, items):
         self.items = items
+        self.max_quality_value = 50
 
     def update_quality(self):
         for item in self.items:
@@ -12,15 +13,8 @@ class GildedRose(object):
                     if item.name != "Sulfuras, Hand of Ragnaros":
                         self._decrease_item_quality(item)
             else:
-                if item.quality < 50:
-                    item.quality = item.quality + 1
-                    if item.name == "Backstage passes to a TAFKAL80ETC concert":
-                        if item.sell_in < 11:
-                            if item.quality < 50:
-                                self._increase_item_quality(item)
-                        if item.sell_in < 6:
-                            if item.quality < 50:
-                                self._increase_item_quality(item)
+                self._increase_item_quality(item)
+                self.update_ticket_quality(item)
             if item.name != "Sulfuras, Hand of Ragnaros":
                 item.sell_in = item.sell_in - 1
             if item.sell_in < 0:
@@ -32,17 +26,27 @@ class GildedRose(object):
                     else:
                         self._drop_item_quality(item)
                 else:
-                    if item.quality < 50:
-                        self._increase_item_quality(item)
+                    self._increase_item_quality(item)
+
+    def update_ticket_quality(self, item):
+        if item.name == "Backstage passes to a TAFKAL80ETC concert":
+            if item.sell_in < 11:
+                self._increase_item_quality(item)
+            if item.sell_in < 6:
+                self._increase_item_quality(item)
 
     def _increase_item_quality(self, item):
-        item.quality = item.quality + 1
+        if self._not_at_max_item_quality(item):
+            item.quality += 1
 
     def _decrease_item_quality(self, item):
-        item.quality = item.quality - 1
+        item.quality -= 1
 
     def _drop_item_quality(self, item):
         item.quality = 0
+
+    def _not_at_max_item_quality(self, item):
+        return item.quality < self.max_quality_value
 
 class Item:
     def __init__(self, name, sell_in, quality):
